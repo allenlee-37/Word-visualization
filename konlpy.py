@@ -74,7 +74,7 @@ def make_wordcloud(words):
     plt.figure(figsize=(50,50))
     plt.imshow(wordcloud,interpolation='bilinear')
     plt.axis('off') # 차트로 나오지 않게
-    plt.savefig(f"./result/test.png")
+    plt.savefig(f"./wordcloud_result/test.png")
     return
 
 def main():
