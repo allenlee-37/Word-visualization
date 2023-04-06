@@ -9,6 +9,9 @@ from nltk.corpus import stopwords
 from collections import Counter
 from wordcloud import WordCloud
 from PIL import Image
+import os
+import argparse
+
 
 ''' 출력 단어 갯수 '''
 word_volume = 50
@@ -18,7 +21,7 @@ custom_stopwords = ['example', 'of', 'stop', 'words', '``',
                     'wa', 'ha', 'aslo',
                     ]
 
-def load_data(fileName): return pd.read_excel(f'./data/{fileName}', index_col=0)
+def load_data(fileName): return pd.read_excel(f'./data/{fileName}.xlsx', index_col=0)
 
 def text_cleaning(text):
     # text = re.sub(r'[^.,?!\s\w]',' ',str(text)) # 특수문자 삭제
@@ -61,7 +64,7 @@ def count_words(lemmatized_words, word_volume):
     common_words_dict = dict(common_words_tuple)
     return common_words_dict
 
-def make_wordcloud(words):
+def make_wordcloud(words, fileName):
     cand_mask=np.array(Image.open('./data/circle2.png'))
     wordcloud = WordCloud(
         font_path = 'NanumGothicBold.ttf', # 한글 글씨체 설정
@@ -69,17 +72,22 @@ def make_wordcloud(words):
         colormap='Reds', # 글씨색은 빨간색으로
         mask=cand_mask, # 워드클라우드 모양 설정
     ).generate_from_frequencies(words)
-
     # 사이즈 설정 및 출력
     plt.figure(figsize=(50,50))
     plt.imshow(wordcloud,interpolation='bilinear')
     plt.axis('off') # 차트로 나오지 않게
-    plt.savefig(f"./wordcloud_result/test.png")
+    # /Users/master/dev/PythonPr/NLP-visualization/wordcloud_result
+    plt.savefig(f"./wordcloud_result/{fileName}-test.png")
     return
 
 def main():
+    # Argument Parser 만들기
+    p = argparse.ArgumentParser()
+    p.add_argument('--fileName','-f', type=str, required=True)
+    args = p.parse_args()
+    fileName = args.fileName
     # 데이터 로드
-    df = load_data('korea medical-2023-04-04-result.xlsx')
+    df = load_data(fileName)
     # 텍스트 전처리
     df['title'] = list(map(lambda x: text_cleaning(x), df['title']))
     df['body'] = list(map(lambda x: text_cleaning(x), df['body']))
@@ -99,7 +107,7 @@ def main():
     word_dict.sort()
 
     common_words = count_words(processed_lemmatized_words, word_volume)
-    make_wordcloud(common_words)
+    make_wordcloud(common_words, fileName)
 
 if __name__ == "__main__":
     main()
